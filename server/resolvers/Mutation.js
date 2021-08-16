@@ -6,7 +6,7 @@ const {APP_SECRET} = require('../utils');
 async function post(parent, args, context) {
   const { userId } = context;
 
-  return await context.prisma.link.create({
+  const newLink = await context.prisma.link.create({
     data: {
       url: args.url,
       description: args.description,
@@ -17,6 +17,10 @@ async function post(parent, args, context) {
       },
     },
   });
+
+  await context.pubsub.publish('NEW_LINK', { newLink });
+
+  return newLink;
 }
 
 async function updateLink(parent, args, context) {
@@ -36,7 +40,7 @@ async function updateLink(parent, args, context) {
 async function deleteLink(parent, args, context) {
   const deletedLink = await context.prisma.link.delete({
     where: {
-      id: parseInt(args.id, 10),
+      id: Number(args.id),
     },
   });
 
@@ -51,9 +55,9 @@ async function signup(parent, args, context) {
       password,
     },
   });
-  const token = jwt.sign({ userId: user.id }, APP_SECRET);
+  const token = jwt.sign({userId: user.id}, APP_SECRET);
 
-  return { token, user };
+  return {token, user};
 }
 
 async function login(parent, args, context) {
@@ -62,11 +66,13 @@ async function login(parent, args, context) {
       email: args.email,
     },
   });
+
   if (!user) {
     throw new Error('No such user found!');
   }
 
   const valid = await bcrypt.compare(args.password, user.password);
+
   if (!valid) {
     throw new Error('Invalid password!');
   }
@@ -76,10 +82,39 @@ async function login(parent, args, context) {
   return { token, user };
 }
 
+async function vote(parent, args, context) {
+  const userId = context.userId;
+
+  const vote = await context.prisma.vote.findUnique({
+    where: {
+      linkId_userId: {
+        linkId: Number(args.linkId),
+        userId,
+      },
+    },
+  });
+
+  if (Boolean(vote)) {
+    throw new Error(`Already voted for link ${args.linkId}`);
+  }
+
+  const newVote = context.prisma.vote.create({
+    data: {
+      user: { connect: { id: userId } },
+      link: { connect: { id: Number(args.linkId) } },
+    },
+  });
+
+  await context.pubsub.publish('NEW_VOTE', { newVote });
+
+  return newVote;
+}
+
 module.exports = {
   post,
   updateLink,
   deleteLink,
   signup,
   login,
+  vote,
 };
