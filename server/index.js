@@ -9,13 +9,13 @@ const http = require('http');
 const path = require('path');
 const { SubscriptionServer } = require('subscriptions-transport-ws');
 
-const { getUserId } = require('./utils');
-const Query = require('./resolvers/Query');
-const Mutation = require('./resolvers/Mutation');
-const User = require('./resolvers/User');
-const Link = require('./resolvers/Link');
-const Subscription = require('./resolvers/Subscription');
-const Vote = require('./resolvers/Vote');
+const { getUserId } = require('./src/utils');
+const Query = require('./src/resolvers/Query');
+const Mutation = require('./src/resolvers/Mutation');
+const User = require('./src/resolvers/User');
+const Link = require('./src/resolvers/Link');
+const Subscription = require('./src/resolvers/Subscription');
+const Vote = require('./src/resolvers/Vote');
 
 (async function startApolloServer() {
   const resolvers = {
