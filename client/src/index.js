@@ -7,9 +7,10 @@ import {
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import './styles/index.css';
 import App from './components/App/App';
 import reportWebVitals from './reportWebVitals';
+
+import './styles/index.css';
 
 const httpLink = createHttpLink({
   uri: 'http://localhost:4000',
