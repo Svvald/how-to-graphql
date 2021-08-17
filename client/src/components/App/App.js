@@ -1,10 +1,10 @@
-import LinkList from "../LinkList/LinkList";
+import CreateLink from "../CreateLink/CreateLink";
 
 import './App.css';
 
 function App() {
   return (
-    <LinkList />
+    <CreateLink />
   );
 }
 
